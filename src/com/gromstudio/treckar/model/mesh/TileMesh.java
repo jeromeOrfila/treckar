@@ -51,10 +51,21 @@ public class TileMesh extends MeshES20 {
 	    	pointsBuffer.put(p.y);
 	    	pointsBuffer.put(p.z);	
 	    	
-			colorsBuffer.put((float)Color.red(p.color)/255.0f);
-			colorsBuffer.put((float)Color.green(p.color)/255.0f);
-			colorsBuffer.put((float)Color.blue(p.color)/255.0f);
-			colorsBuffer.put(1.0f);
+	    	if ( !p.deleted ) {
+	    		
+				colorsBuffer.put((float)Color.red(p.color)/255.0f);
+				colorsBuffer.put((float)Color.green(p.color)/255.0f);
+				colorsBuffer.put((float)Color.blue(p.color)/255.0f);
+				colorsBuffer.put((float)Color.alpha(p.color)/255.0f);
+				
+	    	} else {
+				
+	    		colorsBuffer.put(1.0f);
+				colorsBuffer.put(0.0f);
+				colorsBuffer.put(0.0f);
+				colorsBuffer.put(1.0f);
+
+	    	}
 
 	    }
 	    

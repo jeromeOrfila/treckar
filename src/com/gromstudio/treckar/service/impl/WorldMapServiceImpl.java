@@ -177,7 +177,7 @@ public class WorldMapServiceImpl extends WorldMapService implements GeolocationL
 
 		tile.setPixels(pixels, width, height);
 
-		MeshES20 mesh = tile.buildTile(50);
+		MeshES20 mesh = tile.buildTile();
 		
 		//MeshES20 mesh =  TileMesh.fromTile(tile, 50);
 		tile.setPixels(null, 0, 0);
@@ -249,14 +249,6 @@ public class WorldMapServiceImpl extends WorldMapService implements GeolocationL
 
 	public Bitmap getTileBitmap(Context context, Tile tile) {
 
-//		if ( !folderExists(context, "maps") ) {
-//			
-//			if ( !copyFolder(context, "maps") ) {
-//				Log.e(TAG, "impossible to load files");
-//				return null;
-//			}
-//			
-//		}
 		if ( !copyFolder(context, "maps") ) {
 			Log.e(TAG, "impossible to load files");
 			return null;
@@ -282,9 +274,9 @@ public class WorldMapServiceImpl extends WorldMapService implements GeolocationL
 			
 			BitmapFactory.Options opts = new BitmapFactory.Options();
 			if ( !tile.isCenter() ) {
-				opts.inSampleSize = 12;
+				opts.inSampleSize = 16;
 			} else {				
-				opts.inSampleSize = 8;
+				opts.inSampleSize = 4;
 			}
 			bitmap = BitmapFactory.decodeStream(istr, null, opts);
 			istr.close();

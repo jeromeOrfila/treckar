@@ -47,7 +47,15 @@
     	    android:text="1000m"
 	        />
         
-        </RelativeLayout>
+        <Button 
+            android:id="@+id/updownbutton"
+	        android:layout_width="wrap_content"
+    	    android:layout_height="wrap_content"
+    	    android:layout_alignParentBottom="true"
+    	    android:layout_alignParentRight="true" 
+    	    android:text="up/down"/>
+
+   	</RelativeLayout>
     <!--
         android:text="@string/dummy_content"
         android:textColor="#33b5e5"

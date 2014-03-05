@@ -6,23 +6,22 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
 
 import com.gromstudio.treckar.R;
-import com.gromstudio.treckar.model.mesh.Mesh;
 import com.gromstudio.treckar.model.mesh.MeshES20;
-import com.gromstudio.treckar.model.mesh.TileMesh;
 import com.gromstudio.treckar.service.ServicesManager;
 import com.gromstudio.treckar.service.WorldMapService;
 import com.gromstudio.treckar.service.WorldMapService.NoTileException;
 import com.gromstudio.treckar.service.WorldMapService.NotLocalizedException;
 import com.gromstudio.treckar.ui.BasePopup;
 import com.gromstudio.treckar.ui.CompassView;
-import com.gromstudio.treckar.ui.ConfirmPopup;
 import com.gromstudio.treckar.ui.InformPopup;
-import com.gromstudio.treckar.ui.PositiveNegativeBasePopup;
 import com.gromstudio.treckar.ui.WorldMapView;
-import com.gromstudio.treckar.ui.PositiveNegativeBasePopup.PositiveNegativePopupListener;
-import com.gromstudio.treckar.util.Compass;
 import com.gromstudio.treckar.util.CoordinateConversions;
 import com.gromstudio.treckar.util.Geolocation;
 import com.gromstudio.treckar.util.SystemUiHider;
@@ -33,14 +32,19 @@ import com.gromstudio.treckar.util.SystemUiHider;
  * 
  * @see SystemUiHider
  */
-public class ARActivity extends Activity {
+public class ARActivity extends Activity implements OnClickListener{
 
 	static final String TAG = "ARActivity";
 	
 	static final int REQUEST_CODE_SETTINGS = 101;
+	private static final int SWIPE_MIN_DISTANCE = 120;
+    private static final int SWIPE_MAX_OFF_PATH = 250;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 	
 	
 	WorldMapView mWorldMapView;
+	GestureDetector gestureDetector;
+	View.OnTouchListener gestureListener;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +58,20 @@ public class ARActivity extends Activity {
 		mWorldMapView = (WorldMapView) findViewById(R.id.world_map_view);
 		mWorldMapView.setZOrderMediaOverlay(true);
 
+		findViewById(R.id.updownbutton).setOnClickListener(this);
 	    CoordinateConversions.testColor();
+	    
+	    
+
+		gestureDetector = new GestureDetector(this, new WorldViewGestureDetector());
+        gestureListener = new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                return gestureDetector.onTouchEvent(event);
+            }
+        };
+        
+        mWorldMapView.setOnTouchListener(gestureListener);
+	    
 
 	}
 
@@ -156,5 +173,38 @@ public class ARActivity extends Activity {
 		}
 		
 	}
+
+
+	@Override
+	public void onClick(View v) {
+		if ( v.getId()==R.id.updownbutton) {
+			mWorldMapView.switchCameraUpDown();
+		}
+		
+	}
 	
+	class WorldViewGestureDetector extends SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            try {
+//                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+//                    return false;
+                // right to left swipe
+                if (e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                	mWorldMapView.animateCameraUp();
+                }  else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                	mWorldMapView.animateCameraDown();
+                }
+            } catch (Exception e) {
+                // nothing
+            }
+            return false;
+        }
+
+            @Override
+        public boolean onDown(MotionEvent e) {
+              return true;
+        }
+    }
+
 	}

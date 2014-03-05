@@ -4,6 +4,10 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.MotionEvent;
+import android.view.View;
 
 import com.gromstudio.treckar.model.mesh.GyroMesh;
 import com.gromstudio.treckar.model.mesh.Mesh;
@@ -20,12 +24,15 @@ public class WorldMapView extends GLSurfaceView implements OnCompassChangedListe
 
 	static final boolean DEBUG = true;
 	static final String TAG = "WorldMapView";
-
+    
 	float [] mSensorRotation;
 	
 	private MeshES20 mMesh;
-	private GLES20Renderer mRenderer;
-
+	private GLES20ImmRenderer mRenderer;
+	private boolean mIsCameraDown = true;
+	private GestureDetector gestureDetector;
+    View.OnTouchListener gestureListener;
+    
 	public WorldMapView(Context context) {
 		super(context);
 		initialize(context, null, 0);
@@ -60,6 +67,24 @@ public class WorldMapView extends GLSurfaceView implements OnCompassChangedListe
 		mRenderer.setMesh(mesh);
 
 	}
+	
+	public void switchCameraUpDown () {
+		if ( mIsCameraDown ) {
+			mRenderer.cameraUp();
+		} else {
+			mRenderer.cameraDown();
+		}
+		mIsCameraDown = !mIsCameraDown;
+	}
+	public void animateCameraUp () {
+			mRenderer.cameraUp();
+		mIsCameraDown = false;
+	}
+	
+	public void animateCameraDown() {
+		mRenderer.cameraDown();
+		mIsCameraDown = true;	
+	}
 
 	@Override
 	protected void onAttachedToWindow() {
@@ -78,4 +103,6 @@ public class WorldMapView extends GLSurfaceView implements OnCompassChangedListe
 
 	}
 
+	
+	
 }

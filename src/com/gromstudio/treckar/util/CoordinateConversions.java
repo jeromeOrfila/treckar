@@ -7,8 +7,10 @@ public class CoordinateConversions {
 
 	static final String TAG =  "CoordinateConversions";
 
-	static final double RADtoDEG = (3.1415926535897932384626433832795 / 180.0);
+	static final double DEGtoRAD = (3.1415926535897932384626433832795 / 180.0);
 	//WGS84
+	static final double RADtoDEG = (180.0 / 3.1415926535897932384626433832795);
+
 	static final float ellipseE= 0.081819191025f; //1/298,257223563
 	
 	public static final float RADIUS= 6378137.00f; //.5f;//
@@ -61,8 +63,8 @@ public class CoordinateConversions {
 		// http://www.forumsig.org/archive/index.php/t-9120.html
 		// http://geodesie.ign.fr/index.php?page=calculs_sur_un_ellipsoide
 	
-		double lat = geodPos[0] * RADtoDEG;
-		double lon = geodPos[1] * RADtoDEG;
+		double lat = geodPos[0] * DEGtoRAD;
+		double lon = geodPos[1] * DEGtoRAD;
 		double alt = geodPos[2]; /* metres */
 
 		double sinlat = Math.sin(lat);
@@ -101,7 +103,7 @@ public class CoordinateConversions {
 
 	}
 
-	public static int globeColorFromAltitude(float altitude) {
+	public static int globeColorFromAltitude(float altitude, float altMin, float altMax) {
 
 		float[] hsv = new float[3];
 		
@@ -111,9 +113,10 @@ public class CoordinateConversions {
 		}
 		hsv[1] = .5f;
 		hsv[2] = .5f;
-
-		return Color.HSVToColor(hsv);
-
+		float alpha = (altitude-altMin)/(altMax-altMin);
+		int res = Color.HSVToColor(hsv);
+		return Color.argb((int)(255*alpha), Color.red(res), Color.green(res), Color.blue(res));
+		
 	}
 
 	public static float[] RGBToIHS (float [] rgb) {

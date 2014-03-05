@@ -32,8 +32,8 @@ public class MathUtils {
 	 * @param scalar The scalar
 	 **/
 	public static void multiply(int size, float[] vector, int offset, float scalar) {
-		for (int i=0;i<vector.length;i++)
-			vector[i] *= scalar;
+		for (int i=0;i<size;i++)
+			vector[offset+i] *= scalar;
 	}
 
 	/**

@@ -1,6 +1,8 @@
 package com.gromstudio.treckar.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import android.graphics.Color;
 import android.util.Log;
@@ -26,7 +28,7 @@ public class Tile {
 		}
 	}
 	
-	static final float MINIMUM_ERROR = 0.00f;
+	static final float MINIMUM_ERROR = 0.0001f;
 	
 	public enum VDirectionEnum {N, S};
 	public enum HDirectionEnum {E, W};
@@ -168,6 +170,7 @@ public class Tile {
 	}
 	
 	public static class TilePoint {
+		public boolean deleted = false;
 		public float x; public float y; public float z;
 		public int color;
 		TilePoint[] neighors = null;
@@ -183,13 +186,14 @@ public class Tile {
 		public TileTriangle t1; 
 		public TileTriangle t2; 
 		public TileTriangle t3;
-		public float e = 1.0f;
-		public boolean deleted = false;
+		public boolean deleted=false;
+		public byte passdone=0;
 		public TileTriangle(TilePoint point1, TilePoint point2, TilePoint point3) {
 			this.p1 = point1; 
 			this.p2 = point2; 
 			this.p3 = point3;
 		}
+
 		public void setTriangle1(TileTriangle triangle) {
 			t1 = triangle;
 		}
@@ -199,41 +203,51 @@ public class Tile {
 		public void setTriangle3(TileTriangle triangle) {
 			t3 = triangle;
 		}
+
 		public void getNormal(float[] result, int offset) {
-//			float[] p1p2 = new float[] {p2.x-p1.x, p2.y-p1.y,p2.z-p1.z};
-//			float[] p1p3 = new float[] {p3.x-p1.x, p3.y-p1.y,p3.z-p1.z};
 			result[offset] = (p2.y-p1.y)*(p3.z-p1.z) - (p2.z-p1.z)*(p3.y-p1.y);
 			result[offset+1] = (p2.z-p1.z)*(p3.x-p1.x) - (p2.x-p1.x)*(p3.z-p1.z);
 			result[offset+2] = (p2.x-p1.x)*(p3.y-p1.y) - (p2.y-p1.y)*(p3.x-p1.x);			
 			MathUtils.normalize(3, result, offset);
-			
 		}
 		
 		public boolean hasAllNeighbors() {
 			return t1!=null && t2!=null && t3!=null;
 		}
 		
-		public boolean hasAllNeighbors2() {
-			return hasAllNeighbors() && t1.hasAllNeighbors() && t2.hasAllNeighbors() && t3.hasAllNeighbors();
-		}
-		
 		/**
 		 * 
 		 * @param tmp must be of length 9
 		 */
-		public float calculate(float[] tmp) {
-			if ( !hasAllNeighbors2() ) {
-				e = 1.0f;
-				return e;
-			}
+		public byte calculateSimilarity(byte pass, float[] tmp, float[] result) {
+			byte maxIndex = 0;
 			getNormal(tmp, 0);
-			t1.getNormal(tmp, 3);
-			t2.getNormal(tmp, 6);
-			t3.getNormal(tmp, 9);
-			MathUtils.add(3, tmp, 3, tmp, 6, tmp, 9);
-			MathUtils.normalize(3, tmp, 9);			
-			e = MathUtils.dot(3, tmp, 0, tmp, 9);
-			return e;
+			if ( t1.passdone >= pass ) {
+				t1.getNormal(tmp, 3);
+				result[0] = MathUtils.dot(3, tmp, 0, tmp, 3);			
+			} else {
+				result[0] = 0.0f;
+			}
+			if ( t2.passdone >= pass ) {
+				t2.getNormal(tmp, 3);
+				result[1] = MathUtils.dot(3, tmp, 0, tmp, 3);		
+				if ( result[1]>result[maxIndex] ) {
+					maxIndex = 1;
+				}
+			} else {
+				result[1] = 0.0f;
+			}
+			if ( t3.passdone >= pass ) {
+				t3.getNormal(tmp, 3);
+				result[2] = MathUtils.dot(3, tmp, 0, tmp, 3);				
+				if ( result[2]>result[maxIndex] ) {
+					maxIndex = 2;
+				}
+			} else {
+				result[2] = 0.0f;
+			}
+			passdone = pass;
+			return maxIndex;
 		}
 		
 		public boolean getBarycenter(float[] center) {
@@ -244,6 +258,22 @@ public class Tile {
 			center[1] = (p1.y + p2.y + p3.y) / 3.0f;
 			center[2] = (p1.z + p2.z + p3.z) / 3.0f;
 			return true;
+		}
+
+		public void replacePoint(TilePoint oldPoint, TilePoint newPoint) {
+			if ( p1==oldPoint ) {
+				p1=newPoint;
+				t1.replacePoint(oldPoint, newPoint);
+				t3.replacePoint(oldPoint, newPoint);
+			} else if ( p2==oldPoint ) {
+				p2=newPoint;
+				t2.replacePoint(oldPoint, newPoint);
+				t1.replacePoint(oldPoint, newPoint);
+			} else if ( p3==oldPoint ) {
+				p3=newPoint;
+				t3.replacePoint(oldPoint, newPoint);
+				t2.replacePoint(oldPoint, newPoint);
+			}
 		}
 		
 		public void replaceLink(TileTriangle oldTriangle, TileTriangle newTriangle) {
@@ -256,53 +286,52 @@ public class Tile {
 			if (t3==oldTriangle ) {
 				t3 = newTriangle;
 			}
+			passdone = 0;
 		}
-			
-		public void neighborDiscarded(TileTriangle t) {
+		
+		public static TilePoint edgeCenter(TilePoint p1, TilePoint p2) {
+			TilePoint result = new TilePoint(
+					(p2.x+p1.x)/2.0f,
+					(p2.y+p1.y)/2.0f,
+					(p2.z+p1.z)/2.0f,
+					Color.rgb(
+							(Color.red(p1.color) + Color.red(p2.color))/2,
+							(Color.green(p1.color) + Color.green(p2.color))/2,
+							(Color.blue(p1.color) + Color.blue(p2.color))/2));
+			return result;
+		}
+		
+		public void collapseEdgeWithNeighbor(TileTriangle t) {
+			if ( t!=t1 && t!=t2 && t!=t3 ) {
+				return;
+			}
 			if ( t==t1 ) {
+				TilePoint p = edgeCenter(p1, p2);
+				replacePoint(p1, p);
+				replacePoint(p2, p);
 				t2.replaceLink(this, t3);
 				t3.replaceLink(this, t2);
-			} 
-			if ( t==t2 ) {
+				p1.deleted = true;
+				p2.deleted = true;
+			} else if ( t==t2 ) {
+				TilePoint p = edgeCenter(p2, p3);
+				replacePoint(p2, p);
+				replacePoint(p3, p);
 				t1.replaceLink(this, t3);
 				t3.replaceLink(this, t1);
-			}
-			if ( t==t3 ) {
+				p2.deleted = true;
+				p3.deleted = true;
+			} else if ( t==t3 ) {
+				TilePoint p = edgeCenter(p3, p1);
+				replacePoint(p3, p);
+				replacePoint(p1, p);
 				t1.replaceLink(this, t2);
 				t2.replaceLink(this, t1);
+				p3.deleted = true;
+				p1.deleted = true;
 			}
+			t.deleted=true;
 			deleted = true;
-		}
-		
-		public void discard() {
-			
-			t1.neighborDiscarded(this);
-			t2.neighborDiscarded(this);
-			t3.neighborDiscarded(this);
-			
-			deleted = true;
-		}
-		
-		public void replacePoint(TilePoint oldPoint, TilePoint newPoint) {
-			boolean replaced = false;
-			if ( p1==oldPoint ) {
-				p1 = newPoint;
-				replaced = true;
-			}
-			if ( p2==oldPoint ) {
-				p2 = newPoint;
-				replaced = true;
-			}
-			if ( p3==oldPoint ) {
-				p2 = newPoint;
-				replaced = true;
-			}
-			if ( replaced ) {
-				// update neighbors
-				t1.replacePoint(oldPoint, newPoint);
-				t2.replacePoint(oldPoint, newPoint);
-				t3.replacePoint(oldPoint, newPoint);
-			}
 		}
 	}
 	
@@ -310,22 +339,20 @@ public class Tile {
 		return buildTile(Math.max(mWidth, mHeight));
 	}
 	
-	public MeshES20 buildTile(int samples) {
+	private MeshES20 buildTile(int samples) {
 
 		if ( mMetadata==null ) {
 			throw new IllegalStateException("Tile's metadata not initialized.");
 		}
 
-		int nbSamples = Math.min(samples, Math.max(mWidth, mHeight));
+		Log.e("Simplification", "Starting tile " + getCode() + " generation.");
+
+		int nbSamples = Math.min(samples, Math.min(mWidth, mHeight));
 		if ( nbSamples<2 ) {
 			return null;
 		}
 		
 		int pointsCount = nbSamples*nbSamples;
-		
-		float[] topLeft= mMetadata.tl;
-		float altmin = 0;
-		float altmax = 10000;
 		
 		float [] geod = new float[3];
 		float [] geoc = new float[3];
@@ -333,7 +360,9 @@ public class Tile {
 		
 		final float deltaLat = (mMetadata.tl[0] - mMetadata.bl[0])/(float) (nbSamples-1);
 		final float deltaLong = (mMetadata.tr[1] - mMetadata.tl[1])/(float) (nbSamples-1);
-		
+
+		Log.e("Simplification", "  Generating "+pointsCount+" points for " + getCode() + ".");
+
 		float dLat = 0.0f; // positive number between 0.0f and 1.0f 
 		float dLgt = 0.0f; // positive number between 0.0f and 1.0f
 		for (int j = 0; j<nbSamples; j++) { // delta on latitudes
@@ -352,7 +381,6 @@ public class Tile {
 					x=0;
 				}
 				
-				
 				int color = mPixels[y*mWidth+x];
 				
 				geod[0] = mMetadata.tl[0] - dLat;
@@ -362,7 +390,7 @@ public class Tile {
 				CoordinateConversions.getGeocCoords(geod, geoc);
 				
 				points.add(new TilePoint(geoc[0], geoc[1], geoc[2], 
-						CoordinateConversions.globeColorFromAltitude(geod[2])));
+						CoordinateConversions.globeColorFromAltitude(geod[2],mMetadata.alt_min, mMetadata.alt_max)));
 				
 				dLgt += deltaLong;
 			}
@@ -370,6 +398,7 @@ public class Tile {
 		}
 			
 		int triangleCount = (nbSamples-1) * (nbSamples-1) * 2;
+		Log.e("Simplification", "  Generating "+triangleCount+" triangles for " + getCode() + ".");
 		ArrayList<TileTriangle> triangles  = new ArrayList<TileTriangle>(triangleCount);
 		int index = 0;
 		for (int j = 0; j<(nbSamples-1); j++) { // delta on latitudes
@@ -406,50 +435,67 @@ public class Tile {
 			}			
 		}
 
-//		float[] tmp = new float[12];
+		Log.e("Simplification", "  Simplificating surface for " + getCode() + ".");
+//		float[] tmp = new float[6];
+//		float[] similarity = new float[3];
 //		boolean simplified = true;
-//		int passes = 0;
-//		while(simplified && passes<100 ) {
+//		byte pass = 1;
+//		while(simplified && pass<=100 ) {
+//			
+//			int o=0;
 //			simplified = false;
 //			Iterator<TileTriangle> it = triangles.iterator();
 //			while (it.hasNext()) {
 //				TileTriangle triangle = it.next();
-//				if ( triangle!=null && !triangle.deleted) {
-//					float res = triangle.calculate(tmp);
-//					if ( res < MINIMUM_ERROR ) {
-//	
-//						// delete triangle
-//						float[] center = new float[3];
-//						if ( triangle.getBarycenter(center) ) {
-//							TilePoint p = new TilePoint(center[0], 
-//									center[1], 
-//									center[2],
-//									CoordinateConversions.colorFromAltitude(center[2]));
-//							points.add(p);
+//				if ( triangle!=null ) {
+//					if ( triangle.deleted) {
+//						it.remove();
+//						o++;
+//					} else if ( triangle.hasAllNeighbors()) {
+//					
+//						byte ind = triangle.calculateSimilarity(pass, tmp, similarity);
+//						
+//						if ( similarity[ind] >= 1.0f-MINIMUM_ERROR ) {
 //		
-//							TilePoint p1 = triangle.p1;
-//							TilePoint p2 = triangle.p2;
-//							TilePoint p3 = triangle.p3;
-//							
-//							triangle.discard();
-//							
-//							points.remove(p1);
-//							points.remove(p2);
-//							points.remove(p3);
-//							
-//							simplified = true;
+//							// delete triangle
+//							float[] center = new float[3];
+//							if ( triangle.getBarycenter(center) ) {
+//	
+//								switch(ind) {
+//								case 0: 
+//									triangle.collapseEdgeWithNeighbor(triangle.t1);
+//	//								triangle.p1.deleted=true;
+//	//								triangle.p2.deleted=true;
+//									break;
+//								case 1: 
+//									triangle.collapseEdgeWithNeighbor(triangle.t2);
+//	//								triangle.p2.deleted=true;
+//	//								triangle.p3.deleted=true;
+//									break;
+//								case 2: 
+//									triangle.collapseEdgeWithNeighbor(triangle.t3);
+//	//								triangle.p1.deleted=true;
+//	//								triangle.p3.deleted=true;
+//									break;
+//								}
+//								simplified = true;
+//							}
 //						}
 //					}
 //				}
 //			}
+//			Log.e("Simplification", "      pass " + pass + ": "+o+" triangles removed.");
+//			pass++;
 //		}
-//		Iterator<TileTriangle> it = triangles.iterator();
-//		while (it.hasNext()) {
-//			TileTriangle triangle = it.next();
-//			if ( triangle!=null && triangle.deleted) {
-//				it.remove();
+//		Iterator<TilePoint> itp = points.iterator();
+//		int p = 0;
+//		while (itp.hasNext()) {
+//			TilePoint point = itp.next();
+//			if ( point!=null && point.deleted) {
+//				itp.remove();p++;
 //			}
 //		}
+//		Log.e("Simplification", "Tile " + getCode() + " done, "+p+" points removed.");
 		return TileMesh.generate(points, triangles);
 	}
 }

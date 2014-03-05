@@ -23,8 +23,6 @@ import android.util.Log;
  */
 public class Geolocation {
 
-
-
 	static class AltitudeBuffer {
 
 		int mIndex;
@@ -136,7 +134,6 @@ public class Geolocation {
 	static final int ALTITUDE_BUFFER_SIZE = 5; //5 last entries
 
 
-
 	/**
 	 * private implementation of the LocationListener. Update the service when
 	 * the providers state change; and dispatch the location change to all the 
@@ -212,6 +209,7 @@ public class Geolocation {
 			startListening = timestamp;
 			wrListener = new WeakReference<GeolocationListener>(listener);
 		}
+
 	}
 
 	/**
@@ -507,9 +505,10 @@ public class Geolocation {
 	 * @return Location
 	 * @throws GeolocationServiceException
 	 */
-	public Location getLastLocation(Context context) throws GeolocationServiceException {
+	public float[] getLastLocation(Context context) {
 
-		return mLastLocation;
+		return new float [] {45.1555234f, 5.63582604f, 2000.0f};
+		//return 
 
 	}
 

@@ -42,14 +42,15 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
     public static final class id {
         public static final int compass_view=0x7f080001;
         public static final int fullscreen_content=0x7f080000;
-        public static final int popup_bg_layout=0x7f080003;
-        public static final int popup_button=0x7f080007;
-        public static final int popup_close_btn=0x7f080008;
-        public static final int popup_content=0x7f080006;
-        public static final int popup_layout=0x7f080004;
-        public static final int popup_no_button=0x7f08000a;
-        public static final int popup_title=0x7f080005;
-        public static final int popup_yes_button=0x7f080009;
+        public static final int popup_bg_layout=0x7f080004;
+        public static final int popup_button=0x7f080008;
+        public static final int popup_close_btn=0x7f080009;
+        public static final int popup_content=0x7f080007;
+        public static final int popup_layout=0x7f080005;
+        public static final int popup_no_button=0x7f08000b;
+        public static final int popup_title=0x7f080006;
+        public static final int popup_yes_button=0x7f08000a;
+        public static final int updownbutton=0x7f080003;
         public static final int world_map_view=0x7f080002;
     }
     public static final class layout {
