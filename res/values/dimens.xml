@@ -1,0 +1,12 @@
+<resources>
+
+    <dimen name="compass_size">150dp</dimen>
+
+    <dimen name="popup_default_padding">10dp</dimen>
+    <dimen name="popup_default_margin">30dp</dimen>
+
+    <dimen name="content_margin">18dp</dimen>
+    <dimen name="content_half_margin">9dp</dimen>
+    <dimen name="content_inter_margin">4dp</dimen>
+
+</resources>

@@ -1,0 +1,64 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/popup_bg_layout"
+    android:background="@color/popup_frame_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".HomeActivity" >
+
+    <LinearLayout
+        android:id="@+id/popup_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/popup_default_margin"
+        android:padding="@dimen/content_half_margin"
+        android:background="@drawable/popup_background"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/popup_title"
+			android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:padding="@dimen/content_half_margin"
+            />
+
+        <FrameLayout
+            android:id="@+id/popup_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            >
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:paddingTop="@dimen/popup_default_padding"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/popup_yes_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="@string/yes"
+                />
+
+            <Button
+                android:id="@+id/popup_no_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:text="@string/no"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,0 +1,67 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  	 xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/popup_bg_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/popup_frame_background"
+    tools:context=".HomeActivity" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/popup_default_margin"
+        android:background="@drawable/popup_background" >
+        
+        <LinearLayout
+            android:id="@+id/popup_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/popup_default_padding" >
+
+            <TextView
+                android:id="@+id/popup_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"  />
+
+            <FrameLayout
+                android:id="@+id/popup_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="@dimen/popup_default_margin"
+                android:orientation="vertical" >
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:orientation="vertical"
+                android:paddingTop="@dimen/popup_default_padding" >
+
+                <Button
+                    android:id="@+id/popup_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:text="@string/yes" />
+            </LinearLayout>
+        </LinearLayout>
+        
+        <ImageView
+            android:id="@+id/popup_close_btn" 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_close_popup"
+            android:padding="@dimen/popup_default_padding"
+            />
+        
+    </RelativeLayout>
+
+</FrameLayout>

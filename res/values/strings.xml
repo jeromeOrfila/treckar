@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">TreckAR</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="ok">OK</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
+
+    <string name="popup_geolocalize_text">L\'application nécessite d\'être géolocalisé.</string>
+    <string name="popup_geolocalize_question">Acceptez-vous d\'être géolocalisé?</string>
+
+</resources>
