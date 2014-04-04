@@ -1,5 +1,7 @@
 package com.gromstudio.treckar.ui;
 
+import com.gromstudio.treckar.util.CameraUtils;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.ImageFormat;
@@ -28,7 +30,7 @@ public class CameraView extends SurfaceView {
 			if ( !DISPLAY_CAMERA ) {
 				return;
 			}
-			mCamera=Camera.open();
+			mCamera=CameraUtils.openCamera();
 			
 			try {
 				mCamera.setPreviewDisplay(mPreviewHolder);

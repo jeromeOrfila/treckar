@@ -153,11 +153,14 @@ public class ARActivity extends Activity implements OnClickListener{
 				e.printStackTrace();
 			}
 			
-			MeshES20 m = service.loadTileMesh(45.5f, 5.4f);
+			MeshES20 m = service.loadTileMesh(Geolocation.getInstance().getLastLocation(ARActivity.this)[0],
+					Geolocation.getInstance().getLastLocation(ARActivity.this)[1]);
 			
 			try {
 				Log.e(TAG, String.format("ATLITUDE from la NASA %s",
-						Integer.toHexString(service.getColorFromLoadedTile(45.5f, 5.4f))));
+						Integer.toHexString(service.getColorFromLoadedTile(
+								Geolocation.getInstance().getLastLocation(ARActivity.this)[0],
+								Geolocation.getInstance().getLastLocation(ARActivity.this)[1]))));
 				
 			} catch (NoTileException e) {
 				// TODO Auto-generated catch block

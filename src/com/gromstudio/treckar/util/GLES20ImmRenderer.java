@@ -46,6 +46,11 @@ public class GLES20ImmRenderer extends GLES20Renderer implements GeolocationList
 
 		geolocation.addGeolocationListener(context, this);
 	}
+	
+	@Override
+	protected GLES20Program instanciateProgram() {
+		return new GLES20ImmProgram();
+	}
 
 	protected float[] getViewMatrix() {
 		
@@ -77,15 +82,13 @@ public class GLES20ImmRenderer extends GLES20Renderer implements GeolocationList
 
 		final float ratio = (float) width / height;
 
-		android.hardware.Camera cam=android.hardware.Camera.open();
-		float horizontalFOV =cam.getParameters().getHorizontalViewAngle();    // = 60.5
-		float verticalFOV = cam.getParameters().getVerticalViewAngle();      // = 47.1
-		float camRatio = horizontalFOV / verticalFOV;                          // = 1.2845...
-		cam.release();
+		float[] camFOV = CameraUtils.getCameraFOV();
+		float camRatio = camFOV[0] / camFOV[1];                          // = 1.2845...
+
 		float displayWidth =mContext.getResources().getDisplayMetrics().widthPixels;     // = 800
 		float displayHeight = mContext.getResources().getDisplayMetrics().heightPixels;    // = 480
 		float displayRatio = displayWidth / displayHeight;     // = 1.666...
-		float trueVerticalFOV = horizontalFOV / displayRatio;  // = 36.30...
+		float trueVerticalFOV = camFOV[0] / displayRatio;  // = 36.30...
 		Matrix.perspectiveM(result, 0, trueVerticalFOV, ratio, 500f, 500000.0f);
 		return result;
 	

@@ -507,8 +507,11 @@ public class Geolocation {
 	 */
 	public float[] getLastLocation(Context context) {
 
-		return new float [] {45.1555234f, 5.63582604f, 2000.0f};
-		//return 
+		if ( null==mLastLocation ) {
+			return new float [] {45.1555234f, 5.63582604f, 2000.0f};
+		}
+		return new float [] {(float) mLastLocation.getLatitude(), 
+				(float) mLastLocation.getLongitude(), 2200.0f};
 
 	}
 

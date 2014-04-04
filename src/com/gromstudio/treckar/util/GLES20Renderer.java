@@ -34,7 +34,7 @@ public class GLES20Renderer implements GLSurfaceView.Renderer  {
 	 * Initialize the model data.
 	 */
 	public GLES20Renderer() {
-		mProgram = new GLES20Program();
+		mProgram = instanciateProgram();
 		mRootMesh = null;
 	}
 
@@ -61,6 +61,9 @@ public class GLES20Renderer implements GLSurfaceView.Renderer  {
 
 	}	
 
+	protected GLES20Program instanciateProgram() {
+		return new GLES20DefaultProgram();
+	}
 
 	protected float[] getViewMatrix() {
 
